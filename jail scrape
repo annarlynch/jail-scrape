@@ -1,0 +1,77 @@
+import requests
+
+url = 'http://209.152.119.10/vine/currentinmates/currentinmates.html'
+response = requests.get(url)
+html = response.content
+#print(html)
+
+from bs4 import BeautifulSoup
+soup = BeautifulSoup(html)
+#print(soup.prettify())
+
+table = soup.find('tbody', attrs={'class': 'stripe'})
+for row in soup.find_all('tr'):
+    print(row.prettify())
+
+for row in soup.find_all('tr'):
+    for cell in soup.find_all('td'):
+        print(cell.text)
+
+rows = soup.find_all('tr')
+
+len(rows)
+
+rows[0]
+rows[5]
+
+prisoner_rows = rows[1:]
+
+import numpy as np
+ar = np.array(prisoner_rows)
+
+prisoner_chunks = np.split(ar, len(prisoner_rows) / 6)
+
+def chunkdict(chunk):
+    output = {}
+    output["pic"] = chunk[0].find_all("img")[0]["src"]
+    output["name"] = chunk[0].find_all("td")[-1].text
+    output["age"] = chunk[1].find_all("td")[-1].text
+    output["gender"] = chunk[2].find_all("td")[-1].text
+    output["detained"] = chunk[3].find_all("td")[-1].text
+    output["released"] = chunk[4].find_all("td")[-1].text
+    output["charges"] = chunk[5].find_all("td")[-1].text
+    return output
+
+list(map(chunkdict, prisoner_chunks[0:5]))
+
+prisoner_dicts = [chunkdict(x) for x in prisoner_chunks]
+
+import pandas as pd
+df = pd.DataFrame(prisoner_dicts)
+
+df.to_csv("test_inmates.csv")
+
+import re
+
+# Step 1: find the index where the "charges" column contains "ICE DETENTION".
+index = df[df["charges"].str.contains(r"ICE ")].index.values
+
+# Step 2: use the index to find the value of the cell in the "charges" column.
+# The result is returned as pandas Series object
+ice_Series = df.loc[index]["charges"]
+#print(ice_Series)
+#print(type(ice_Series))
+
+# Step 3: extract the name of the detainee, which is at index 0 in the Series object.
+ice_string = ice_Series[0]
+#print(ice_string)
+
+# Step 4a: find the value of the "name" column where the "charges" column is ice_string.
+#print(df[df["charges"] == ice_string]["name"].values)
+
+# Step 4b: find the value of the "detained" column where the "charges" column is ice_string.
+#print(df[df["charges"] == ice_string]["detained"].values)
+
+df_filtered = df[df['charges'].str.contains('ICE ', na = False)]
+
+len(df_filtered)
