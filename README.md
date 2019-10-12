@@ -11,12 +11,12 @@ Markdown is a lightweight and easy-to-use syntax for styling your writing. It in
 ```markdown
 Syntax highlighted code block
 
-# Header 1
-## Header 2
-### Header 3
+# Does this work?
+## I'm at a hackathon
+### I'm so good
 
-- Bulleted
-- List
+- THis is a bulleted list.
+- THis is the second bullet
 
 1. Numbered
 2. List
